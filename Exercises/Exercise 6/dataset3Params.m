@@ -23,12 +23,27 @@ sigma = 0.3;
 %        mean(double(predictions ~= yval))
 %
 
+C_tests = [0.01 0.03 0.1 0.3 1, 3, 10 30];
+sigma_tests = [0.01 0.03 0.1 0.3 1, 3, 10 30];
 
+[m,n] = ndgrid(C_tests,sigma_tests);
+Comb = [m(:),n(:)];
 
+prediction_error_min = Inf;
 
-
-
-
-% =========================================================================
+for col=1:size(Comb,1)
+    C_test = Comb(col,1);
+    sigma_test = Comb(col,2);
+    
+    model = svmTrain(X, y, C_test, @(x1, x2) gaussianKernel(x1, x2, sigma_test));
+    predictions = svmPredict(model, Xval);
+    prediction_error = mean(double(predictions ~= yval));
+    
+    if prediction_error < prediction_error_min
+        prediction_error_min = prediction_error;
+        C = C_test;
+        sigma = sigma_test;
+    end
+end
 
 end
